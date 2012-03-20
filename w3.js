@@ -28,7 +28,6 @@ function W3_class()
 	this.UI_NAMESPACE	= 'ui';
 
 	this._objModule 		= {};
-	this._objGlobalModule	= {};
 	this._elmTemp;
 				
 	//------------------------------------------------------------------------//
@@ -55,24 +54,13 @@ function W3_class()
 		var $objRequest = this._newRequestObject();
 		if ($objRequest)
 		{
-			$objRequest.onreadystatechange = function()
-			{
-				if (this.readyState == 4)
-				{
-					if (this.status == 200)
-					{
-						w3._handleReply(this);
-					} else {
-						w3._handleError(this);
-					}
-				}
-			}
 			$objRequest.w3Id = $strId;
 			$objRequest.w3TargetElement = $strTarget;
 			$objRequest.w3ModuleName = $strModule;
 			$objRequest.open("POST", $strUrl, true);
 			$objRequest.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
-			$objRequest.send(JSON.dump($objSend));
+			$objRequest.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+			$objRequest.send(JSON.stringify($objSend));
 			return true;
 		}
 		return false;
@@ -101,22 +89,11 @@ function W3_class()
 		var $objRequest = this._newRequestObject();
 		if ($objRequest)
 		{
-			$objRequest.onreadystatechange = function()
-			{
-				if (this.readyState == 4)
-				{
-					if (this.status == 200)
-					{
-						w3._handleReply(this);
-					} else {
-						w3._handleError(this);
-					}
-				}
-			}
 			$objRequest.w3Id = $strId;
 			$objRequest.w3TargetElement = $strTarget;
 			$objRequest.w3ModuleName = $strModule;
 			$objRequest.open("GET", $strUrl, true);
+			$objRequest.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 			$objRequest.send(null);
 			return true;
 		}
@@ -125,6 +102,27 @@ function W3_class()
 	
 	//[**] return a new AJAX request object
 	this._newRequestObject = function()
+	{
+		var $objRequest = this._getNewRequestObject();
+		if ($objRequest)
+		{
+			$objRequest.onreadystatechange = function()
+			{
+				if (this.readyState == 4)
+				{
+					if (this.status == 200)
+					{
+						window[W3_NAMESPACE]._handleReply(this);
+					} else {
+						window[W3_NAMESPACE]._handleError(this);
+					}
+				}
+			}
+		}
+		return $objRequest;
+	}
+	
+	this._getNewRequestObject = function()
 	{
 		// Native XMLHttpRequest browsers (Mozilla, Netscape, Firefox etc)
 		if (typeof(XMLHttpRequest) != 'undefined')
@@ -323,6 +321,35 @@ function W3_class()
 	}
 	
 	//------------------------------------------------------------------------//
+	// applyCSS
+	//------------------------------------------------------------------------//
+	/**
+	 * applyCSS()
+	 *
+	 * Dynamically apply CSS from a string
+	 *
+	 * @param  string  CSS         CSS to be applied
+	 *
+	 * @return  void
+	 */
+	this.applyCSS = function($strCSS)
+	{
+		var $elmTarget = document.createElement('style');
+		$elmTarget.setAttribute("type", "text/css");
+		document.getElementsByTagName("head")[0].appendChild($elmTarget);
+		if ($elmTarget.styleSheet)
+		{
+			// ie
+			$elmTarget.styleSheet.cssText = $strCSS;
+		}
+		else
+		{
+			// real browsers
+			$elmTarget.appendChild(document.createTextNode($strCSS));
+		}
+	}
+	
+	//------------------------------------------------------------------------//
 	// deepCopy
 	//------------------------------------------------------------------------//
 	/**
@@ -339,8 +366,15 @@ function W3_class()
 	 * @return  mixed  Object or array
 	 */
 	this.deepCopy = function($mixValue)
-	{	
-		return JSON.parse(JSON.stringify($mixValue));
+	{
+		if (typeof($mixValue) == 'object')
+		{
+			return JSON.parse(JSON.stringify($mixValue));
+		}
+		else
+		{
+			return $mixValue;
+		}
 	}
 	
 	//------------------------------------------------------------------------//
@@ -371,7 +405,40 @@ function W3_class()
 		{
 			$mixMod = this._objModule[$mixMod];
 		}
-		$mixMod[$strMethod].apply($mixMod, $arrCallback);
+		return $mixMod[$strMethod].apply($mixMod, $arrCallback);
+	}
+	
+	//------------------------------------------------------------------------//
+	// enhanceLinks
+	//------------------------------------------------------------------------//
+	/**
+	 * enhanceLinks()
+	 *
+	 * Enhance links on a page.
+	 *
+	 * @return  void
+	 */
+	this.enhanceLinks = function()
+	{
+		var $arrLink = document.getElementsByTagName('a');
+		var i;
+		for (i in $arrLink)
+		{
+			if ($arrLink[i].href)
+			{
+				var $strAction = $arrLink[i].getAttribute('data-enhance');
+				switch ($strAction)
+				{
+					case 'none':
+						break;
+					case 'remove':
+						$arrLink[i].removeAttribute('href');
+						break;
+					default:
+						$arrLink[i].target = "_blank";
+				}
+			}
+		}
 	}
 	
 	//------------------------------------------------------------------------//

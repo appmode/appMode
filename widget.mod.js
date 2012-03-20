@@ -140,7 +140,7 @@ alert($strType + " missing extends " + $strExtends);
 	 * or
 	 * ['viewName', 'parentWidgetName', 'widgetName']
 	 * 
-	 * @param  string  Id          description
+	 * @param  string  Id          the id of the widget
 	 *
 	 * @return  array  the widget path
 	 */
