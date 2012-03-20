@@ -1,0 +1,240 @@
+--------------------------------------------------------------------------------
+Widgets
+--------------------------------------------------------------------------------
+
+Widgets in appMode are the core building blocks of the user interface.
+
+Each widget has a JavaScript widget object which can be accessed from within the 
+tree of the ui namespace. All JavaScript widget objects extend either the base
+widget type or another widget type (which in turn will extend the base widget
+type).
+
+Attributes
+    Attributes of a widget are directly accessible via dot notation or square 
+    bracket notation. For example:
+        $wgtWidget.attributeName
+        $wgtWidget['attributeName']
+    
+    Attributes names starting with an underscore are reserved for private 
+    attributes.
+    
+    Attributes should be kept to a minimum to keep the widget namespace clear.
+
+Properties
+    Properties of a widget are stored internally and may only be accessed via 
+    the .property() method.
+
+Styles
+    Styles of a widget are stored internally and may only be accessed via 
+    the .style() method.
+    
+Namespace
+    Each widget is a namespace for its direct child widgets. Child widgets are 
+    accessible via dot notation or square bracket notation. 
+    For example:
+        $wgtWidget.childWidgetName
+        $wgtWidget['childWidgetName']
+
+        
+--------------------------------------------------------------------------------
+Attributes (base)
+--------------------------------------------------------------------------------
+
+Widgets which extent the w3 base widget have the following attributes:
+
+obj     .childWidgets
+            The child widgets of the widget.
+            An associative array object with the child widget ids as keys.
+
+str     .id
+            The id of the widget.
+            Each widget id is unique and is set at compile time. The id of a 
+            widget remains the same even if the widget is appended to a new 
+            parent at runtime.
+            
+str     .name
+            The name of the widget.
+            Each widget name is unique within its direct parent at compile time.
+            Widgets appended to a new parent at runtime should not have the same 
+            name as other widgets directly within the new parent as the newly 
+            appended widget would not be accessible within the widget namespace 
+            (however the widget would still be available within the 
+            .childWidgets object).
+
+wgt     .parentView
+            The parent view.
+            
+wgt     .parentWidget.
+            The parent widget
+
+str     .type
+            The type of the widget.
+
+obj     .w3
+            A shortcut to the w3 runtime object.
+
+
+--------------------------------------------------------------------------------
+Methods (base)
+--------------------------------------------------------------------------------
+
+Widgets which extent the w3 base widget have the following methods:
+
+.addClass       ($strClass)
+    Add a CSS class to the widget.
+    
+        str     $strClass
+                    The name of the CSS class to be added to the widget.
+                    
+        void    return
+
+.appendChild    ($wgtChild [, $elmChild])
+    Append a child widget to the widget.
+        wgt     $wgtChild
+                    The widget to be appended.
+                    
+                    If set to false and $elmChild is set to a DOM element, only
+                    the DOM element will be appended.
+        
+        elm     $elmChild
+                    The optional DOM element for the widget. By default the DOM
+                    element will be found using the getElement() method of the 
+                    widget.
+                    
+                    If set to false the DOM element for the widget will not be 
+                    appended.
+            
+        wgt     return
+                    The appended widget.
+
+.getElement     ([$strTarget])
+    Get a DOM element associated with the widget.
+    
+    When called with no parameters the base element for the widget will be 
+    returned.
+    
+    When called with one parameter a sub element of the widget will be returned.
+    
+    The DOM element will be cached by the widget.
+        
+        str     $strTarget
+                    The optional name of the sub element to get. Refer to the
+                    individual widget documentation for sub element names.
+                    
+        elm     return
+                    A DOM element.
+
+.hasClass       ($strClass)
+    Check if a widget has a specified CSS class set.
+    
+        str     $strClass
+                    The name of the CSS class to check for.
+                    
+        bool    return
+
+.property       ([$strName[, $mixValue]])
+    Get or set a property value of the widget.
+
+    When called with one parameter the value of the property will be returned.
+
+    When called with two parameters the value of the property will be set. The 
+    actual value of the property will be returned (this value may differ from
+    the $mixValue parameter as the .property() method may convert the value). 
+    
+    When called with no parameters the entire property object of the widget will 
+    be returned as an associative array object with the property names as keys.
+    Modifying a property in this object will directly modify the property
+    within the widget (bypassing the .property() method). Modifying a property
+    directly may have unexpected results and is not advised.
+
+        str     $strName
+                    The name of the property to get or set.
+                    
+        mixed   $mixValue
+                    The value of the property to be set.
+                    
+        mixed   return
+                    The value of the property, or the entire property object of
+                    the widget.
+
+.removeChild    ($wgtChild [, $bolRemoveDom])
+    Remove a child widget of the widget.
+        wgt     $wgtChild
+                    The widget to be removed.
+                    
+        bool    $bolRemoveDom
+                    Defaults to true.
+                    
+                    If set to false the DOM element for the widget will not be
+                    removed.
+                    
+        wgt     return
+                    The removed widget.
+
+.removeClass    ($strClass)
+    Remove a CSS class from a widget.
+    
+        str     $strClass
+                    The name of the CSS class to be removed from the widget.
+                    
+        void    return
+
+.trigger        ($strEvent [, $objEvent])
+    Trigger an event on the object.
+    
+        str     $strEvent
+                    The type of the event to be triggered, 
+                    for example "onclick".
+        
+        obj     $objEvent
+                    An optional event object to be passed to the event handlers.
+                    If not provided, a pseudo event object will be generated.
+        
+        mixed   return
+                    Returns undefined.
+                    Returns false if the .preventDefault() method of the event 
+                    object has been called.
+
+
+--------------------------------------------------------------------------------
+Attributes (style)
+--------------------------------------------------------------------------------
+
+The w3 style widget extends the w3 base widget and inherits all attributes from 
+it.
+
+
+--------------------------------------------------------------------------------
+Methods (style)
+--------------------------------------------------------------------------------
+
+The w3 style widget extends the w3 base widget and inherits all methods from it.
+
+Widgets which extent the w3 style widget also have the following methods:
+
+.style          ([$strName [, $mixValue]])
+    Get or set a style value of the widget.
+
+    When called with one parameter the value of the style will be returned.
+
+    When called with two parameters the value of the style will be set. The 
+    actual value of the style will be returned (this value may differ from
+    the $mixValue parameter as the .style() method may convert the value). 
+    
+    When called with no parameters the entire style object of the widget will 
+    be returned as an associative array object with the style names as keys.
+    Modifying a style in this object will directly modify the style
+    within the widget (bypassing the .style() method). Modifying a style
+    directly may have unexpected results and is not advised.
+
+        str     $strName
+                    The name of the style to get or set.
+                    
+        mixed   $mixValue
+                    The value of the style to be set.
+                    
+        mixed   return
+                    The value of the style, or the entire style object of
+                    the widget.
+
+
