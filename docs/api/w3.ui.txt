@@ -3,7 +3,7 @@ The w3.ui Runtime Module
 --------------------------------------------------------------------------------
 
 The ui runtime module provides for the creation and management of view & 
-widget user interface objects.
+widget user interface components.
 
 
 --------------------------------------------------------------------------------
@@ -21,15 +21,7 @@ The ui namespace forms a tree of all widgets and views, for example:
     ui.viewName.widgetName
     ui.viewName.widgetName.childWidgetName
     
-
---------------------------------------------------------------------------------
-Global Methods
---------------------------------------------------------------------------------
-
-document.getWidgetById()
-    An alias to the .getWidgetById() method of the ui module.
     
-
 --------------------------------------------------------------------------------
 Attributes
 --------------------------------------------------------------------------------
@@ -57,8 +49,12 @@ Methods
                     
         obj     $objView
                     The view definition.
+        
+        wgt     return
+                    The created view widget or false if the widget type is not 
+                    found.
 
-.createWidget   ($strType, $objWidget [, $objPyEvents])
+.createWidget   ($strType, $objWidget)
     Create a JavaScript widget object.
     The DOM portion of the widget should already be loaded before this 
     method is called.
@@ -69,15 +65,11 @@ Methods
         obj     $objWidget
                     The widget definition.
                     
-        obj     $objPyEvents
-                    Data requirements for Python backend event handlers.
-                    
         wgt     return
                     The created widget or false if the widget type is not found.
 
 .getWidgetById      ($strId)
     Get a widget by id.
-    For convenience this method is also aliased as document.getWidgetById() .
             
         str     $strId
                     The id of the widget to be returned.
@@ -156,7 +148,19 @@ Methods
                     until after the specified view has finished loading.
                     
         void    return
+
+.register       ($strType, $objConstructor, $strExtends)
+    Register a widget class.
+    
+        str     $strType
+                    The name of the widget type to register.
+                    
+        obj     $objConstructor
+                    The constructor class for the widget type.
         
+        str     $strExtends
+                    Name of the widget class to extend from.
+
 .setTarget      ($strTarget)
     Set the target folder to load views from, there will usually be no need
     to change this from the default setting.

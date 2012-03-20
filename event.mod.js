@@ -34,11 +34,26 @@ W3_event_module = function()
 	 * Normalize an event object.
 	 *
 	 * @param  object  Event       Browser event object (or normalized event object)
+	 * @param  string  Event       Event type
+	 * @param  widget  Target      Target widget
 	 *
 	 * @return  object  A normalized event object.
 	 */
-	this.normalize = function($objEvent)
+	this.normalize = function($objEvent, $strEvent, $wgtTarget)
 	{
+		// check for pseudo event
+		if (!$objEvent || typeof($objEvent) != 'object')
+		{
+			$objEvent			= {};
+			$objEvent.pseudo	= true;
+			$objEvent.target	= $wgtTarget.getElement();
+			$objEvent.type		= $strEvent;
+			if ($strEvent.startsWith('on'))
+			{
+				$objEvent.type	= $strEvent.slice(2);
+			}
+		}
+		
 		// don't re-normalize an event object
 		if ($objEvent.w3)
 		{
@@ -49,7 +64,7 @@ W3_event_module = function()
 		var $objNormal = new this._ClassNormalizedEvent($objEvent);
 	
 		// make sure the event has a target
-		$objNormal.target = $objEvent.target || $objEvent.srcElement || document;
+		$objNormal.target = $objEvent.target || $objEvent.srcElement || $wgtTarget.getElement() || document;
 		
 		// account for safari textnode target bug
 		if ($objNormal.target.nodeType == 3)
@@ -124,38 +139,32 @@ W3_event_module = function()
 		this.w3			= window[W3_NAMESPACE];
 		this._objEvent	= $objEvent;
 		
+		this.type		= $objEvent.type;
 		this.shiftKey	= $objEvent.shiftKey;
 		this.altKey		= $objEvent.altKey;
 		this.ctrlKey	= $objEvent.ctrlKey;
 		
 		this.stopPropagation = function()
 		{
-			var $objEvent = this._objEvent;
-			if (typeof($objEvent) == 'object')
+			// ie
+			this._objEvent.cancelBubble = true;
+			// real browsers		
+			if (this._objEvent.stopPropagation)
 			{
-				// ie
-				$objEvent.cancelBubble = true;
-				// real browsers		
-				if ($objEvent.stopPropagation)
-				{
-					$objEvent.stopPropagation();
-				}
+				this._objEvent.stopPropagation();
 			}
 		}
 		
 		this.preventDefault = function()
 		{
-			var $objEvent = this._objEvent;
-			if ($objEvent)
+			// ie
+			this._objEvent.returnValue = false;
+			// real browsers
+			if (this._objEvent.preventDefault)
 			{
-				// ie
-				$objEvent.returnValue = false;
-				// real browsers
-				if ($objEvent.preventDefault)
-				{
-					$objEvent.preventDefault();
-				}
+				this._objEvent.preventDefault();
 			}
+				
 			// used by evt handler to return false
 			this.returnValue = false;
 		}

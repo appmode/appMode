@@ -24,10 +24,10 @@ function W3_class()
 	this.ID_SEPARATOR	= '__';
 	this.CSS_PREFIX		= 'w3';
 	this.CSS_SEPARATOR	= '-';
-	this.VERSION		= '12.03.14';
+	this.VERSION		= '12.03.20';
 	this.UI_NAMESPACE	= 'ui';
 
-	this._objModule 		= {};
+	this._objModule 	= {};
 	this._elmTemp;
 				
 	//------------------------------------------------------------------------//
@@ -37,25 +37,20 @@ function W3_class()
 	 * requestPost()
 	 *
 	 * Send an AJAX POST request
-	 * 
-	 * WARNING : The params and functionality of this method WILL be 
-	 * changed in the next API review!
 	 *
 	 * @param  string  Module      The path of the module making the request
 	 * @param  string  Url         The URL to send the request to
 	 * @param  object  Send        The data to send with the request
-	 * @param  string  Target      The id of a DOM element to fill (innerHTML) with the result of the request
-	 * @param  string  Id          The id of the request
+	 * @param  mixed   Info        Optional information to be passed to the handleReply or handleError method when the request completes.
 	 *
 	 * @return  bool
 	 */
-	this.requestPost = function($strModule, $strUrl, $objSend, $strTarget, $strId)
+	this.requestPost = function($strModule, $strUrl, $objSend, $mixInfo)
 	{
 		var $objRequest = this._newRequestObject();
 		if ($objRequest)
 		{
-			$objRequest.w3Id = $strId;
-			$objRequest.w3TargetElement = $strTarget;
+			$objRequest.w3Info = $mixInfo;
 			$objRequest.w3ModuleName = $strModule;
 			$objRequest.open("POST", $strUrl, true);
 			$objRequest.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
@@ -73,24 +68,39 @@ function W3_class()
 	 * requestGet()
 	 *
 	 * Send an AJAX GET request
-	 * 
-	 * WARNING : The params and functionality of this method WILL be 
-	 * changed in the next API review!
 	 *
 	 * @param  string  Module      The path of the module making the request
 	 * @param  string  Url         The URL to send the request to
-	 * @param  string  Target      The id of a DOM element to fill (innerHTML) with the result of the request
-	 * @param  string  Id          The id of the request
+	 * @param  object  Send        Optional data to be converted to a query string and sent with the request.
+	 * @param  mixed   Info        Optional information to be passed to the handleReply or handleError method when the request completes.
 	 *
 	 * @return  bool
 	 */
-	this.requestGet = function($strModule, $strUrl, $strTarget, $strId)
+	this.requestGet = function($strModule, $strUrl, $objSend, $mixInfo)
 	{
 		var $objRequest = this._newRequestObject();
 		if ($objRequest)
 		{
-			$objRequest.w3Id = $strId;
-			$objRequest.w3TargetElement = $strTarget;
+			if ($objSend)
+			{
+				var i;
+				var $arrSend = [];
+				for (i in $objSend)
+				{
+					$arrSend.push(encodeURIComponent(i) + "=" + encodeURIComponent($objSend[i]));
+				}
+				if ($strUrl.indexOf("?") == -1)
+				{
+					$strUrl += "?";
+				}
+				else
+				{
+					$strUrl += "&";
+				}
+				$strUrl += $arrSend.join("&");
+			}
+			
+			$objRequest.w3Info = $mixInfo;
 			$objRequest.w3ModuleName = $strModule;
 			$objRequest.open("GET", $strUrl, true);
 			$objRequest.setRequestHeader("X-Requested-With", "XMLHttpRequest");
@@ -176,47 +186,28 @@ function W3_class()
 	{		
 		if (this._objModule[$objRequest.w3ModuleName] && typeof(this._objModule[$objRequest.w3ModuleName]._handleError) == 'function')
 		{
-			this._objModule[$objRequest.w3ModuleName]._handleError($objRequest);
+			this._objModule[$objRequest.w3ModuleName]._handleError($objRequest, $objRequest.w3Info);
 		}
 	}
 	
 	//[**] handle AJAX reply
 	this._handleReply = function($objRequest)
 	{
-		// target specified with request
-		if ($objRequest.w3TargetElement)
+		if (this._objModule[$objRequest.w3ModuleName] && typeof(this._objModule[$objRequest.w3ModuleName]._handleReply) == 'function')
 		{
-			var $elmTemp = document.getElementById($objRequest.w3TargetElement);
-			$elmTemp.innerHTML = $objRequest.responseText;
-			this.runScripts($elmTemp);
-		}
-		else if (this._objModule[$objRequest.w3ModuleName] && typeof(this._objModule[$objRequest.w3ModuleName]._handleReply) == 'function')
-		{
-			this._objModule[$objRequest.w3ModuleName]._handleReply($objRequest);
+			this._objModule[$objRequest.w3ModuleName]._handleReply($objRequest, $objRequest.w3Info);
 		}
 		else
 		{
-			var $elmTemp = this.elmTemp();
+			var $elmTemp = this._getTempElement();
 			$elmTemp.innerHTML = $objRequest.responseText;
 			this.runScripts($elmTemp);
 			$elmTemp.innerHTML = "";
 		}
 	}
-	
-	//------------------------------------------------------------------------//
-	// elmTemp
-	//------------------------------------------------------------------------//
-	/**
-	 * elmTemp()
-	 *
-	 * Get a temporary element.
-	 * 
-	 * WARNING : This method may be changed to an internal method at the next
-	 * API review.
-	 *
-	 * @return  element  A hidden div element
-	 */
-	this.elmTemp = function()
+
+	// get a temporary element
+	this._getTempElement = function()
 	{
 		if (!this._elmTemp)
 		{
@@ -278,24 +269,16 @@ function W3_class()
 	 * loadJS()
 	 *
 	 * Dynamically load a JavaScript script
-	 * 
-	 * This method probably should be reviewed (specifically the Onload 
-	 * property) to see if we should be using a callback rather than a string.
 	 *
 	 * @param  string  URL         URL of the JavaScript resource to be loaded
-	 * @param  string  Onload      optional JavaScript to be executed once the script finishes loading
 	 *
 	 * @return  void
 	 */
-	this.loadJS = function($strURL, $strOnload)
+	this.loadJS = function($strURL)
 	{
 		var $elmScript = document.createElement('script');
 		$elmScript.setAttribute("type", "text/javascript");
 		$elmScript.setAttribute("src",  $strURL);
-		if ($strOnload)
-		{
-			$elmScript.setAttribute("onload",  $strOnload);
-		}
 		document.getElementsByTagName("head")[0].appendChild($elmScript);
 	}
 	
@@ -307,7 +290,7 @@ function W3_class()
 	 *
 	 * Dynamically load a CSS file
 	 *
-	 * @param  string  URL         URL of the CSS resource to be loaded
+	 * @param  string  URL         URL of the CSS resource to be loaded.
 	 *
 	 * @return  void
 	 */
@@ -392,20 +375,30 @@ function W3_class()
 	 * 
 	 * Params can be passed to the callback like:
 	 * ['moduleName', 'methodName', 'value1', 'value2', ... ]
+	 * 
+	 * A callback may also be a function or a string of JavaScript.
 	 *
-	 * @param  array   Callback    a callback array
+	 * @param  mixed   Callback    A callback array, a function, or a string of JavaScript to be executed.
 	 *
-	 * @return  void
+	 * @return  mixed  The return value of the callback.
 	 */
-	this.applyCallback = function($arrCallback)
+	this.applyCallback = function($mixCallback)
 	{
-		var $mixMod		= $arrCallback.shift();
-		var $strMethod	= $arrCallback.shift();
-		if (typeof($mixMod) == "string")
+		switch (typeof($mixCallback))
 		{
-			$mixMod = this._objModule[$mixMod];
+			case 'array':
+				var $mixMod		= $mixCallback.shift();
+				var $strMethod	= $mixCallback.shift();
+				if (typeof($mixMod) == "string")
+				{
+					$mixMod = this._objModule[$mixMod];
+				}
+				return $mixMod[$strMethod].apply($mixMod, $mixCallback);
+			case 'string':
+				return eval($mixCallback);
+			case 'function':
+				return $mixCallback();
 		}
-		return $mixMod[$strMethod].apply($mixMod, $arrCallback);
 	}
 	
 	//------------------------------------------------------------------------//
@@ -414,7 +407,7 @@ function W3_class()
 	/**
 	 * enhanceLinks()
 	 *
-	 * Enhance links on a page.
+	 * Apply progressive enhancement to all A tags.
 	 *
 	 * @return  void
 	 */

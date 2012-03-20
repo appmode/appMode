@@ -107,20 +107,14 @@ Methods
     
         str     $strURL
                     URL of the CSS resource to be loaded
-        
-        mixed   $mixCallback
-                    A callback to be executed after loading.
                     
         void    return
 
-.loadJS         ($strUrl, $mixCallback)
+.loadJS         ($strUrl)
     Dynamically load a JavaScript file
     
         str     $strURL
                     URL of the JavaScript resource to be loaded
-                    
-        mixed   $mixCallback
-                    A callback to be executed after loading.
                 
         void    return
 

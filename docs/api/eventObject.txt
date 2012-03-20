@@ -91,11 +91,6 @@ Methods
 --------------------------------------------------------------------------------
 Notes
 --------------------------------------------------------------------------------
-
-elm     .relatedTargetWithId
-elm     .targetWithId
-            These elements are also available as .target.targetNode 
-            and .relatedTarget.targetNode
             
 int     .offsetX
 int     .offsetY
