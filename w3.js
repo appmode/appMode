@@ -1,6 +1,6 @@
-//--------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 // appMode
-//--------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 /*
  * appMode (c) Copyright 2012 APPMO LTD
  * 
@@ -24,7 +24,7 @@ function W3_class()
 	this.ID_SEPARATOR	= '__';
 	this.CSS_PREFIX		= 'w3';
 	this.CSS_SEPARATOR	= '-';
-	this.VERSION		= '12.03.20';
+	this.VERSION		= '12.03.28';
 	this.UI_NAMESPACE	= 'ui';
 
 	this._objModule 	= {};
@@ -386,7 +386,7 @@ function W3_class()
 	{
 		switch (typeof($mixCallback))
 		{
-			case 'array':
+			case 'object':
 				var $mixMod		= $mixCallback.shift();
 				var $strMethod	= $mixCallback.shift();
 				if (typeof($mixMod) == "string")

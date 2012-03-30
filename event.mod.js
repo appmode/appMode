@@ -87,7 +87,7 @@ W3_event_module = function()
 		{
 			this.getTargetNode($objNormal.target);
 		}
-		this.targetWithId = $objNormal.target.targetNode;
+		$objNormal.targetWithId = $objNormal.target.targetNode;
 		
 		// cache relatedTarget node
 		if ($objNormal.relatedTarget)
@@ -96,7 +96,7 @@ W3_event_module = function()
 			{
 				this.getTargetNode($objNormal.relatedTarget);
 			}
-			this.relatedTargetWithId = $objNormal.relatedTarget.targetNode;
+			$objNormal.relatedTargetWithId = $objNormal.relatedTarget.targetNode;
 		}
 		
 		// normalize keycodes (which)

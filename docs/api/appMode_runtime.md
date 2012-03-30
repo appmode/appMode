@@ -1,0 +1,178 @@
+The appMode Runtime
+================================================================================
+
+[TOC]
+
+w3
+--------------------------------------------------------------------------------
+
+w3 is the core of the appMode JavaScript runtime library.
+
+The runtime is made available as `this.w3` within w3 module methods, widget 
+methods, and widget event handlers.
+
+The runtime is available globally as `window[W3_NAMESPACE]` which by default 
+makes the runtime available as `window.w3` and `w3` .
+
+Runtime modules are available under the `w3` namespace, for example:
+
+    w3.moduleName
+    this.w3.moduleName
+
+
+Global Constants
+--------------------------------------------------------------------------------
+
+bool    window.FALSE
+:   `false`
+    Provides consistency with PHP false constant.
+
+bool    window.False
+:   `false`
+    Provides consistency with Python false constant.
+
+bool    window.TRUE
+:   `true`
+    Provides consistency with PHP true constant.
+
+bool    window.True
+:   `true`
+    Provides consistency with Python true constant.
+            
+str     window.W3_NAMESPACE
+:   `'w3'`
+    The global namespace of the w3 runtime.
+    The w3 runtime can be accessed as `window[W3_NAMESPACE]` .
+    
+
+Constants
+--------------------------------------------------------------------------------
+
+str     .CSS_PREFIX
+:   `'w3'`
+    The prefix used when constructing a widget CSS class name.
+
+str     .CSS_SEPARATOR
+:   `'-'`
+    The separator used when constructing a widget CSS class name.
+            
+str     .ID_PREFIX
+:   `'w3'`
+    The prefix used when constructing a widget id.
+            
+str     .ID_SEPARATOR
+:   `'__'`
+    The separator used when constructing a widget id.
+            
+str     .UI_NAMESPACE
+:   `'ui'`
+    The global namespace of the user interface.
+
+str     .VERSION
+:   The runtime version
+
+
+Methods
+--------------------------------------------------------------------------------
+
+mixed   .applyCallback  ($mixCallback)
+:   Run a callback method on a module.
+    
+    The method expects a callback array like:
+    `['moduleName', 'methodName']`
+    or
+    `[objModule, 'methodName']`
+    
+    Params can be passed to the callback like:
+    `['moduleName', 'methodName', 'value1', 'value2', ... ]`
+    
+    A callback may also be a function or a string of JavaScript.
+    
+    arr     $mixCallback
+    A callback array, a function, or a string of JavaScript to be executed.
+                    
+    mixed   return
+    The return value of the callback.
+    
+void    .applyCSS       ($strCSS)
+:   Dynamically apply CSS from a string
+    
+    str     $strCSS
+    CSS to be applied
+
+mixed   .deepCopy       ($mixValue)
+:   Make a deep copy of an object or array. All descendant objects will be
+    copied rather than referenced.
+     
+    Don't pass objects with circular references to this method or you will break
+    the Internet. That means you can't pass widgets to this method.
+
+    mixed   $mixValue
+    The object or array to be copied.
+                    
+    mixed   return
+    An object or array.
+
+void    .enhanceLinks   ()
+:   Apply progressive enhancement to all A tags.
+
+void    .loadCSS        ($strURL)
+:   Dynamically load a CSS file
+    
+    str     $strURL
+    URL of the CSS resource to be loaded
+
+void    .loadJS         ($strUrl)
+:   Dynamically load a JavaScript file
+    
+    str     $strURL
+    URL of the JavaScript resource to be loaded
+
+void    .registerModule ($objModule)
+:   Register a module
+        
+    obj     $objModule
+    An instance of the module to be registered.
+
+bool    .requestGet     ($strModule, $strUrl [, $objSend [, $mixInfo]])
+:   Send an AJAX GET request
+    
+    str     $strModule
+    The path of the module making the request.
+                    
+    str     $strUrl
+    The URL to send the request to.
+                    
+    obj     $objSend
+    Optional data to be converted to a query string and sent with the request.
+                    
+    mixed   $mixInfo
+    Optional information to be passed to the handleReply or handleError method 
+    when the request completes.
+
+bool    .requestPost    ($strModule, $strUrl, $objSend [, $mixInfo])
+:   Send an AJAX POST request
+        
+    str     $strModule
+    The path of the module making the request.
+                    
+    str     $strUrl
+    The URL to send the request to.
+                    
+    obj     $objSend
+    The data to be sent with the request.
+                    
+    mixed   $mixInfo
+    Optional information to be passed to the handleReply or handleError method 
+    when the request completes.
+
+void    .runScripts     ($elmTarget)
+:   Recursively execute all of the script tags in a DOM element and its 
+    children.
+    
+    Script tags added to the DOM via `.innerHTML` do not get executed, this 
+    method should be called if the scripts need to be run.
+    
+    elm     $elmTarget
+    A DOM element with child script nodes added via `.innerHTML` .
+

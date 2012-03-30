@@ -17,7 +17,7 @@
  */
 
 // Define Class
-W3_widget_module = function()
+W3_ui_module = function()
 {
 	// module name
 	this.name		= 'ui';
@@ -36,11 +36,14 @@ W3_widget_module = function()
 	this.views		= {};
 	
 	// view target
-	this._strTarget = '/w3/form/';
+	this._strTarget = '/app/view/';
+	
+	this._strWait		= false;
 	
 	// load queues
 	this._objLoadQueue	= {};
 	this._objWaitQueue	= {};
+	this._objFailQueue	= {};
 
 	//------------------------------------------------------------------------//
 	// loadView
@@ -60,28 +63,12 @@ W3_widget_module = function()
 	this.loadView = function($strName, $strWait)
 	{
 		// add to load queue
-		this._objLoadQueue[$strName] = $strWait;
+		this._objLoadQueue[$strName] = $strWait || this._strWait;
+		
+		this._strWait = $strName;
 		
 		// load
-		this.parent.requestGet(this.path, this._strTarget + $strName + '.w3f', null, $strName);
-	}
-	
-	//------------------------------------------------------------------------//
-	// setTarget
-	//------------------------------------------------------------------------//
-	/**
-	 * setTarget()
-	 *
-	 * Set the target folder to load views from, there will usually be no need
-	 * to change this from the default setting.
-	 *
-	 * @param  string  Target      path to target folder
-	 *
-	 * @return  void
-	 */
-	this.setTarget = function($strTarget)
-	{
-		this._strTarget = $strTarget;
+		this.parent.requestGet(this.path, this._strTarget + $strName + '.w3v', null, $strName);
 	}
 	
 	//[**] reply handler
@@ -112,8 +99,38 @@ W3_widget_module = function()
 			this._objWaitQueue[$strName] = $objRequest;
 		}
 	}
+	
+	this._handleError = function($objRequest, $strName)
+	{
+		// add to the fail queue
+		this._objFailQueue[$strName] = this._objFailQueue[$strName] || 0;
+		
+		// give up on loading the view
+		if (this._objFailQueue[$strName] > 5)
+		{
+			// remove from load queue
+			delete(this._objLoadQueue[$strName]);
+		
+			// load any waiting views
+			var i;
+			for (i in this._objWaitQueue)
+			{
+				if (this._objLoadQueue[i] == $strName)
+				{
+					this._handleReply(this._objWaitQueue[i], i);
+				}
+			}
+		}
+		// try and reload the view
+		else
+		{
+			this._objFailQueue[$strName]++;
+			this.loadView($strName, this._objLoadQueue[$strName]);
+		}
+	}
 		
 	this._loadView = function($objRequest)
+	{
 		// create a temporary div node
 		var $elmDiv = document.createElement("div");
 		
@@ -327,7 +344,9 @@ alert($strType + " missing extends " + $strExtends);
 	 */
 	this.createView = function($strName, $objView)
 	{
-		this.views[$strName] = this.createWidget($objView);
+		this.views[$strName]				= this.createWidget($objView.type, $objView);
+		this.views[$strName].parentWidget	= this.views[$strName];
+		this.views[$strName].parentView		= this.views[$strName];
 		return this.views[$strName];
 	}
 	
@@ -345,10 +364,11 @@ alert($strType + " missing extends " + $strExtends);
 	 *
 	 * @param  string  Type        The widget type to create.
 	 * @param  object  Widget      The widget definition.
+	 * @param  bool    Children    Set false to prevent child widgets from being created, defaults to true 
 	 *
 	 * @return  widget  the created widget or false if the widget type is not found
 	 */
-	this.createWidget = function($strType, $objWidget)
+	this.createWidget = function($strType, $objWidget, $bolChildren)
 	{	
 		// check widget type exists
 		if (!this._objType[$strType])
@@ -358,8 +378,8 @@ alert('bad widget type: ' + $strType);
 		}
 		
 		// create a new widget
-		var $wgtWidget = {};
-		$wgtWidget.prototype = this._objType[$strType];
+		this._createWidget.prototype = this._objType[$strType];
+		var $wgtWidget = new this._createWidget();
 		
 		// add type
 		$wgtWidget.type = $strType;
@@ -397,13 +417,16 @@ alert('bad widget type: ' + $strType);
 		this.widgets[$wgtWidget.id] = $wgtWidget;
 
 		// create and append child widgets
-		if ($objWidget && Children in $objWidget)
+		if ($bolChildren !== false)
 		{
-			var i;
-			for (i in $objWidget.Children)
+			if ($objWidget && 'Children' in $objWidget)
 			{
-				// create/append child widget
-				$wgtWidget.appendChild(this.createWidget($objWidget.Children[i].type, $objWidget.Children[i]));
+				var i;
+				for (i in $objWidget.Children)
+				{
+					// create/append child widget
+					$wgtWidget.appendChild(this.createWidget($objWidget.Children[i].type, $objWidget.Children[i]));
+				}
 			}
 		}
 
@@ -412,6 +435,11 @@ alert('bad widget type: ' + $strType);
 
 		// return the widget
 		return $wgtWidget;
+	}
+	
+	this._createWidget = function()
+	{
+		
 	}
 	
 
@@ -429,7 +457,7 @@ alert('bad widget type: ' + $strType);
 	 */
 	this.isView = function($objWidget)
 	{
-		if (typeof($objWidget) == 'object' && $objWidget.w3 && typeof($objWidget.Form) == 'object' && $objWidget.id == $objWidget.Form.id)
+		if (typeof($objWidget) == 'object' && $objWidget.w3 && typeof($objWidget.parentView) == 'object' && $objWidget.id == $objWidget.parentView.id)
 		{
 			return true;	
 		}
@@ -468,6 +496,6 @@ window[W3_NAMESPACE].registerModule(new W3_ui_module());
 // Remove Class Definition
 delete(W3_widget_module);
 
-// add a global ui object to hold all forms (shortcut to w3.form.forms)
+// add a global ui object to hold all forms (shortcut to w3.parentView.parentViews)
 window[window[W3_NAMESPACE].UI_NAMESPACE] = window[W3_NAMESPACE].ui.views;
 
