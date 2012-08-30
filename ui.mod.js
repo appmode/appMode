@@ -36,7 +36,7 @@ W3_ui_module = function()
 	this.views		= {};
 	
 	// view target
-	this._strTarget = '/app/view/';
+	this._strTarget = 'app/view/';
 	
 	this._strWait		= false;
 	
@@ -74,6 +74,10 @@ W3_ui_module = function()
 	//[**] reply handler
 	this._handleReply = function($objRequest, $strName)
 	{
+		if (this._strWait == $strName)
+		{
+			this._strWait	= false;
+		}
 		if (!this._objLoadQueue[$strName] || !(this._objLoadQueue[$strName] in this._objLoadQueue))
 		{
 			// load view

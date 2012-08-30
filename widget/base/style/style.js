@@ -222,8 +222,22 @@ this._fixStyleValue = function($strName, $mixValue)
 		case 'backgroundImage':
 			if (!$mixValue.startsWith('URL'))
 			{
-				return 'URL("' + $mixValue + '")';
+				//TODO!!!! : what if it starts with lowercase url?
+				$mixValue = $mixValue.replace(/^URL\(["']?/, '').replace(/["']?\)$/, '');
 			}
+			if (this.imagePrefix)
+			{
+				// add image prefix if required
+				if ($mixValue.startsWith('/image/'))
+				{
+					$mixValue = this.imagePrefix + $mixValue;
+				}
+				else if ($mixValue.startsWith('image/'))
+				{
+					$mixValue = this.imagePrefix + "/" + $mixValue;
+				}
+			}
+			return 'URL(' + $mixValue + ')';
 			break;
 	}
 	return $mixValue;

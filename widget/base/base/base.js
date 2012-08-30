@@ -214,6 +214,8 @@ this.removeChild = function($wgtChild, $bolRemoveDom)
 		var $elmTarget = $wgtChild.getElement();
 		if ($elmTarget)
 		{
+			delete($elmTarget.id);
+			$elmTarget.innerHTML = "";
 			$elmTarget.parentNode.removeChild($elmTarget);
 		}
 	}
@@ -258,6 +260,12 @@ this.trigger = function($strEvent, $objEvent)
 		
 		// fix event type
 		$strEvent = 'on' + $objEvent.type;
+		
+		// check if this event even belongs to us
+		if (!$objEvent.target.targetNode || $objEvent.target.targetNode.targetId != this.id)
+		{
+			return;
+		}
 	}
 	// triggered event
 	else
@@ -283,12 +291,6 @@ this.trigger = function($strEvent, $objEvent)
 	if (this._objProperty.disabled === true)
 	{
 		return false;
-	}
-
-	// check if this event even belongs to us
-	if (!$objEvent.target.targetNode || $objEvent.target.targetNode.targetId != this.id)
-	{
-		return;
 	}
 	
 	// run the event handler
@@ -334,6 +336,7 @@ this._getPropertyValue = function($elmTarget)
 				this._objProperty.value = $elmTemp.value;
 				break;
 			case 'image':
+				//TODO!!!! : remove image prefix if required
 			case 'iframe':
 				this._objProperty.value = $elmTemp.src;
 				break;
@@ -413,6 +416,18 @@ this._setNodeProperty = function($strName, $mixValue)
 						$elmTemp.value = $mixValue;
 						break;
 					case 'image':
+						if (this.imagePrefix)
+						{
+							// add image prefix if required
+							if ($mixValue.startsWith('/image/'))
+							{
+								$mixValue = this.imagePrefix + $mixValue;
+							}
+							else if ($mixValue.startsWith('image/'))
+							{
+								$mixValue = this.imagePrefix + "/" + $mixValue;
+							}
+						}
 					case 'iframe':
 						$elmTemp.src = $mixValue;
 						break;
@@ -649,6 +664,14 @@ this._getElements = function($arrName, $objElements)
 	return $objElements;
 }
 
+/*
+this._getClassName = function()
+{
+	return this.w3.CSS_PREFIX + this.w3.CSS_SEPARATOR + this.type.toSelectorCase();
+}
+*/
+
+//TODO!!!! remove these & use the ones in prototype ????
 // check if an element has a specified class
 this._elementHasClass = function($elmTarget, $strClass)
 {
@@ -666,10 +689,6 @@ this._elementRemoveClass = function($elmTarget, $strClass)
 	{
 		$elmTarget.className = (' '+$elmTarget.className+' ').replace(' '+$strClass+' ', ' ').trim();
 	}
-	else
-	{
-		$elmTarget.className = $strClass;
-	}
 }
 
 // add a class to an element
@@ -679,7 +698,7 @@ this._elementAddClass = function($elmTarget, $strClass)
 	{
 		$elmTarget.className = $strClass;
 	}
-	else if (!this._elementHasClass($strClass))
+	else if (!this._elementHasClass($elmTarget, $strClass))
 	{
 		$elmTarget.className += ' ' + $strClass;
 	}
@@ -708,8 +727,8 @@ this._callback = function($strMethod)
 
 //[**] onchange
 this._onchange = function($objEvent) 
-{ 
-	this._setPropertyValue(this._getPropertyValue($objEvent.target));
+{
+	this._objProperty.value = this._getPropertyValue($objEvent.target);
 }
 
 // ---------------------------------------------------------------//

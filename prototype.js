@@ -196,13 +196,13 @@ if (!String.prototype.hasOwnProperty('toSelectorCase'))
 	/**
 	 * String.toSelectorCase()
 	 *
-	 * Convert a string to selector-case from camelCase 
+	 * Convert a string to selector-case from camelCase or path/case
 	 *
 	 * @return  string
 	 */
 	String.prototype.toSelectorCase = function()
 	{
-		return this.replace(this.re.toSelectorCase, '-$1').toLowerCase();
+		return this.replace(this.re.toSelectorCase, '-$1').toLowerCase().replace('/', '-');
 	}
 	String.prototype.re.toSelectorCase = /([A-Z])/g;
 }
@@ -277,4 +277,47 @@ Number.prototype.removePx = function()
 	return this;
 }
 
+//----------------------------------------------------------------------------//
+// Element
+//----------------------------------------------------------------------------//
 
+// check if an element has a specified class
+if (!Element.prototype.hasOwnProperty('hasClass'))
+{
+	Element.prototype.hasClass = function($strClass)
+	{
+		if (this.className && (' '+this.className+' ').search(' '+$strClass+' ') != -1)
+		{
+			return true;
+		}
+		return false;
+	}
+}
+
+// remove a class from an element
+if (!Element.prototype.hasOwnProperty('removeClass'))
+{
+	Element.prototype.removeClass = function($strClass)
+	{
+		if (this.className)
+		{
+			this.className = (' '+this.className+' ').replace(' '+$strClass+' ', ' ').trim();
+		}
+	}
+}
+
+// add a class to an element
+if (!Element.prototype.hasOwnProperty('addClass'))
+{
+	Element.prototype.addClass = function($strClass)
+	{
+		if (!this.className)
+		{
+			this.className = $strClass;
+		}
+		else if (!this.hasClass($strClass))
+		{
+			this.className += ' ' + $strClass;
+		}
+	}
+}

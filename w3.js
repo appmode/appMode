@@ -24,7 +24,7 @@ function W3_class()
 	this.ID_SEPARATOR	= '__';
 	this.CSS_PREFIX		= 'w3';
 	this.CSS_SEPARATOR	= '-';
-	this.VERSION		= '12.03.28';
+	this.VERSION		= '12.08.24';
 	this.UI_NAMESPACE	= 'ui';
 
 	this._objModule 	= {};
