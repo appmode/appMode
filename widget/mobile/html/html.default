@@ -1,0 +1,23 @@
+{
+	"html":"",
+    "style": {
+        "height": "25%", 
+        "width": "100%",
+        "top":""
+    },
+	"_property"		:
+	{
+		"html":
+		{
+			"redraw":true,
+			"type":"text"
+		}
+	},
+	"_style"		:
+	{
+		"width":false,
+		"height":false,
+		"left":false,
+		"top":false
+	}
+}

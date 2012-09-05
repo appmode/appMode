@@ -5,7 +5,7 @@
  * appMode (c) Copyright 2012 APPMO LTD
  * 
  * author    : Flame Herbohn
- * download  : http://code.google.com/p/appmode/
+ * download  : https://github.com/appmode/appMode
  * license   : GNU Affero General Public License version 3
  * 
  * appMode is a modular runtime environment for hybrid JavaScript/HTML5/CSS3 

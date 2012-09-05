@@ -1,0 +1,30 @@
+{
+	"label":"",
+    "style": {
+        "height"	: "25px", 
+        "width"		: "100%",
+        "top"		: "",
+        "color"		: "#000000"
+    },
+	"_property"		:
+	{
+		"label":
+		{
+			"redraw":true,
+			"type":"text"
+		}
+	},
+	"_style"		:
+	{
+		"width":false,
+		"height":false,
+		"left":false,
+		"color" : false,
+		"top":false,
+		"backgroundColor":false,
+		"backgroundImage":
+		{
+			"type":"image"
+		}
+	}
+}

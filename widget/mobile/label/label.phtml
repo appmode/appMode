@@ -1,0 +1,9 @@
+<div id = "{{ widget.id }}_Label"
+	class = "{{ widget.className }}_label"
+	style = "
+	{{ style.text|indent:1 }}
+	{{ widget.style.height|optional:'line-height:%s;' }}
+	"
+>
+	{{ widget.label|indent:1 }}
+</div>
