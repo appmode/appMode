@@ -300,7 +300,6 @@ this.trigger = function($strEvent, $objEvent)
 //----------------------------------------------------------------------------//
 // PRIVATE Base Widget Methods
 //----------------------------------------------------------------------------//
-
 //[**] get value
 this._getPropertyValue = function($elmTarget)
 {
@@ -328,12 +327,28 @@ this._getPropertyValue = function($elmTarget)
 						}
 						break;
 					default:
-						this._objProperty.value = $elmTemp.value;
+						// IF PLACEHOLDERISDEFAULT = TRUE AND VALUE IS EMPTY
+						if(true == this._objProperty.placeholderIsDefault && this._objProperty.value == '')
+						{
+							// VALUE = PLACEHOLDER
+							this._objProperty.value = this._objProperty.placeholder;
+						} else {
+							// VALUE = VALUE
+							this._objProperty.value = $elmTemp.value;
+						}
 						break;
 				}
 				break;
 			case 'textarea':
-				this._objProperty.value = $elmTemp.value;
+				// IF PLACEHOLDERISDEFAULT = TRUE AND VALUE IS EMPTY
+				if(true == this._objProperty.placeholderIsDefault && this._objProperty.value == '')
+				{
+					// VALUE = PLACEHOLDER
+					this._objProperty.value = this._objProperty.placeholder;
+				} else {
+					// VALUE = VALUE
+					this._objProperty.value = $elmTemp.value;
+				}
 				break;
 			case 'image':
 				//TODO!!!! : remove image prefix if required
